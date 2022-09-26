@@ -1,6 +1,58 @@
+@import "_reset";
+@import "_variable";
+
+@import "_button";
+
+button {
+    @extend %button;
+}
+
 body {
-    background-color: red;
-    div {
-        background-color: blue;
+    background-color: $white;
+    color: $black;
+}
+
+.hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    display: none !important;
+}
+
+body header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2em 4em;
+    background-color: $blue;
+    width: 100%;
+}
+
+body footer {
+    position: sticky;
+    bottom: 0;
+}
+
+.word-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 4em;
+}
+
+.play {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 2fr 1fr 1fr;
+
+    h3,
+    p,
+    span {
+        grid-column: 1/-1;
+        text-align: center;
+    }
+    h3 {
+        font-size: 3em;
     }
 }
