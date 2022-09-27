@@ -30,8 +30,25 @@ body header {
 }
 
 body footer {
-    position: sticky;
+    position: fixed;
+    left: 0;
     bottom: 0;
+    width: 100%;
+    background-color: $purple;
+    padding: 1em 2em 2em 2em;
+    padding-bottom: 3em;
+    transform: translateY(100%);
+
+    .add-word-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+        input {
+            padding: 0.6em 0.8em;
+            font-size: 1.2em;
+            border-radius: 0.3em;
+        }
+    }
 }
 
 .word-list li {
