@@ -151,7 +151,6 @@ const printWord = word => {
 
 const playGame = () => {
   currentWordIndex = (0, _random.default)(wordList);
-  console.log(currentWordIndex);
   printWord(wordList[currentWordIndex]);
 };
 
@@ -169,8 +168,6 @@ const priorityRandom = list => {
     console.log(word, idx);
     cumulativeWeights[idx] = word.priority + (cumulativeWeights[idx - 1] || 0);
   });
-  console.log(cumulativeWeights);
-  console.log(list);
   const maxcumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
   const ran = Math.floor(Math.random() * maxcumulativeWeight);
 
