@@ -70,7 +70,7 @@ const watch = () => {
     gulp.watch(routes.js.watch, buildJs);
 };
 
-const gitDeploy = () => gulp.src("./build").pipe(ghPages());
+const gitDeploy = () => gulp.src("./build/**/*").pipe(ghPages());
 
 const webServer = () => gulp.src("build").pipe(webserver({ livereload: true }));
 
