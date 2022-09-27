@@ -71,6 +71,7 @@ const watch = () => {
 };
 
 const gitDeploy = () => gulp.src("./build/**/*").pipe(ghPages());
+const cleanPublish = async () => await deleteSync([".publish"]);
 
 const webServer = () => gulp.src("build").pipe(webserver({ livereload: true }));
 
@@ -79,4 +80,4 @@ const build = gulp.series([prepare, buildPug, buildScss, buildJs]);
 const post = gulp.series([webServer, watch]);
 
 export const dev = gulp.series([prepare, build, post]);
-export const deploy = gulp.series([prepare, build, gitDeploy]);
+export const deploy = gulp.series([prepare, build, gitDeploy, cleanPublish]);
