@@ -89,6 +89,7 @@ addWordForm.addEventListener("submit", (event) => {
     console.log(newWord);
     addWordList(newWord);
     toggleAddWordBox(false);
+    addBtn.innerText = "add";
 });
 
 loadWordList();
@@ -129,9 +130,11 @@ checkBtn.addEventListener("click", (event) => {
         target.innerText = "next";
         const mean = playBox.querySelector("span");
         mean.classList.remove("hidden");
+        passBtn.disabled = true;
     } else {
         target.innerText = "check";
         playGame();
+        passBtn.disabled = false;
     }
 });
 
