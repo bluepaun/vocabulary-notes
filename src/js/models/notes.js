@@ -1,7 +1,7 @@
 export default class {
     callbacks = {};
     constructor() {
-        this.legacyTest();
+        // this.legacyTest();
         this.notes = this.loadNotes();
     }
 
