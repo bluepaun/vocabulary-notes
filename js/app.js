@@ -3,101 +3,39 @@
 
 var _random = _interopRequireDefault(require("./random"));
 
+var _wordsBox = _interopRequireDefault(require("./views/words-box"));
+
+var _addBox = _interopRequireDefault(require("./views/add-box"));
+
+var _notes = _interopRequireDefault(require("./models/notes"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const addBtn = document.querySelector(".addBtn");
-const addWordbox = document.querySelector(".add-word");
-const addWordForm = document.querySelector(".add-word-form");
-const wordListBox = document.querySelector(".word-list");
+const wordsBox = new _wordsBox.default();
+const addBox = new _addBox.default();
+const notes = new _notes.default();
 const playBox = document.querySelector(".play");
-let wordList = [];
-
-const toggleAddWordBox = on => {
-  if (on) {
-    addWordbox.style.transform = "translateY(0)";
-  } else {
-    addWordbox.style.transform = "translateY(100%)";
-  }
-};
-
-addBtn.addEventListener("click", event => {
-  console.log(event);
-  const curText = event.target.innerText;
-
-  if (curText === "add") {
-    event.target.innerText = "cancel";
-    toggleAddWordBox(true);
-  } else {
-    event.target.innerText = "add";
-    toggleAddWordBox(false);
+addBox.setCallback({
+  funcName: "addWord",
+  func: newWord => {
+    notes.addWord(newWord);
+    wordsBox.printWords(notes.words);
   }
 });
-
-const printWordList = () => {
-  if (wordListBox.classList.contains("hidden")) {
-    return;
+wordsBox.setCallback({
+  funcName: "deleteWord",
+  func: index => {
+    notes.deleteWord(index);
+    wordsBox.printWords(notes.words);
   }
-
-  const ul = wordListBox.querySelector("ul");
-  ul.innerHTML = "";
-  wordList.forEach((word, index) => {
-    const li = document.createElement("li");
-    const span = document.createElement("span");
-    const button = document.createElement("button");
-    span.innerText = word.data;
-    button.innerText = "del";
-    button.addEventListener("click", deleteWord);
-    button.setAttribute("data-index", index);
-    li.appendChild(span);
-    li.appendChild(button);
-    ul.appendChild(li);
-  });
-};
-
-const saveWordList = () => {
-  localStorage.setItem("wordList", JSON.stringify(wordList));
-};
-
-const addWordList = newWord => {
-  wordList.push(newWord);
-  saveWordList();
-  printWordList();
-};
-
-const loadWordList = () => {
-  if (localStorage.wordList) {
-    wordList = JSON.parse(localStorage.wordList);
-  }
-
-  console.log(wordList);
-  printWordList();
-};
-
-const deleteWord = event => {
-  const target = event.target;
-  const index = target.getAttribute("data-index");
-  wordList.splice(index, 1);
-  saveWordList();
-  printWordList();
-};
-
-addWordForm.addEventListener("submit", event => {
-  event.preventDefault();
-  const inputs = addWordForm.querySelectorAll("input");
-  console.log(inputs);
-  const newWord = {
-    priority: 10,
-    data: inputs[0].value,
-    meaning: inputs[1].value,
-    exampleSentence: inputs[2].value
-  };
-  inputs.forEach(input => input.value = "");
-  console.log(newWord);
-  addWordList(newWord);
-  toggleAddWordBox(false);
-  addBtn.innerText = "add";
 });
-loadWordList();
+notes.setCallback({
+  funcName: "loadWordComplete",
+  func: words => {
+    wordsBox.printWords(words);
+  }
+});
+notes.loadWords(notes.notes[0]);
 let currentWordIndex = 0;
 const priorityStep = 1;
 const playBtn = document.querySelector(".playBtn");
@@ -105,13 +43,13 @@ playBtn.addEventListener("click", event => {
   const target = event.target;
 
   if (target.innerText === "start") {
-    wordListBox.classList.add("hidden");
+    wordsBox.classList.add("hidden");
     playBox.classList.remove("hidden");
     target.innerText = "stop";
     playGame();
   } else {
     playBox.classList.add("hidden");
-    wordListBox.classList.remove("hidden");
+    wordsBox.classList.remove("hidden");
     target.innerText = "start";
   }
 });
@@ -157,7 +95,98 @@ const playGame = () => {
   printWord(wordList[currentWordIndex]);
 };
 
-},{"./random":2}],2:[function(require,module,exports){
+},{"./models/notes":2,"./random":3,"./views/add-box":4,"./views/words-box":5}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class _default {
+  constructor() {
+    _defineProperty(this, "callbacks", {});
+
+    this.legacyTest();
+    this.notes = this.loadNotes();
+  }
+
+  legacyTest() {
+    const newWord = {
+      priority: 10,
+      data: "this",
+      meaning: "is",
+      exampleSentence: "test word"
+    };
+    const list = [];
+    list.push(newWord);
+    list.push(newWord);
+    list.push(newWord);
+    localStorage.setItem("wordList", JSON.stringify(list));
+  }
+
+  setCallback(_ref) {
+    let {
+      funcName,
+      func
+    } = _ref;
+    this.callbacks[funcName] = func;
+  }
+
+  loadNotes() {
+    if (!localStorage.notes) {
+      this.notes = ["default"];
+      this.saveNotes();
+    }
+
+    this.notes = JSON.parse(localStorage.notes);
+    return this.notes;
+  }
+
+  loadWords(note) {
+    this.curNote = note;
+
+    if (localStorage[note]) {
+      this.words = JSON.parse(localStorage[note]);
+    } else {
+      //for ver 1.0 legacy code
+      if (localStorage.wordList) {
+        this.words = JSON.parse(localStorage.wordList); // localStorage.removeItem("wordList");
+      } else {
+        this.words = [];
+      }
+
+      this.saveCurWords();
+    }
+
+    this.callbacks.loadWordComplete(this.words);
+  }
+
+  saveNotes() {
+    localStorage.setItem("notes", JSON.stringify(this.notes));
+  }
+
+  saveCurWords() {
+    localStorage.setItem(this.curNote, JSON.stringify(this.words));
+  }
+
+  addWord(word) {
+    this.words.push(word);
+    this.saveCurWords();
+  }
+
+  deleteWord(index) {
+    this.words.splice(index, 1);
+    this.saveCurWords();
+  }
+
+}
+
+exports.default = _default;
+
+},{}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -182,6 +211,159 @@ const priorityRandom = list => {
 };
 
 var _default = priorityRandom;
+exports.default = _default;
+
+},{}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class _default {
+  //addWord
+  constructor() {
+    _defineProperty(this, "callbacks", {});
+
+    this.btn = document.querySelector(".addBtn");
+    this.btn.myClass = this;
+    this.form = document.querySelector(".add-word-form");
+    this.form.myClass = this;
+    this.box = document.querySelector(".add-word");
+    this.box.myClass = this;
+    this.btn.addEventListener("click", this.handleClickEvent);
+    this.form.addEventListener("submit", this.handleSubmit);
+  }
+
+  handleClickEvent(event) {
+    const curText = this.myClass.btn.innerText;
+
+    if (curText === "add") {
+      event.target.innerText = "cancel";
+      this.myClass.toggleBox(true);
+    } else {
+      event.target.innerText = "add";
+      this.myClass.toggleBox(false);
+    }
+  }
+
+  setCallback(_ref) {
+    let {
+      funcName,
+      func
+    } = _ref;
+    this.callbacks[funcName] = func;
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    const inputs = this.myClass.box.querySelectorAll("input"); //need to edit view must not have data format
+
+    const newWord = {
+      priority: 10,
+      data: inputs[0].value,
+      meaning: inputs[1].value,
+      exampleSentence: inputs[2].value
+    };
+    inputs.forEach(input => input.value = "");
+    this.myClass.callbacks.addWord(newWord);
+    this.myClass.btn.innerText = "add";
+    this.myClass.toggleBox(false);
+  }
+
+  toggleBox(on) {
+    if (on) {
+      this.box.style.transform = "translateY(0)";
+    } else {
+      this.box.style.transform = "translateY(100%)";
+    }
+  }
+
+}
+
+exports.default = _default;
+
+},{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class wordList {
+  //deleteWord
+  constructor() {
+    _defineProperty(this, "callbacks", {});
+
+    this.box = document.querySelector(".word-list");
+    this.ul = this.box.querySelector("ul");
+  }
+
+  get isShowing() {
+    return !this.box.classList.contains("hidden");
+  }
+
+  showBox(on) {
+    if (on) {
+      this.box.classList.remove("hidden");
+    } else {
+      this.box.classList.remove("hidden");
+    }
+  }
+
+  setCallback(_ref) {
+    let {
+      funcName,
+      func
+    } = _ref;
+    this.callbacks[funcName] = func;
+  }
+
+  handleDeleteWord(event) {
+    const target = event.target;
+    const index = target.getAttribute("data-index");
+    this.callback(index);
+  }
+
+  generateListItem(index, item) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    const button = document.createElement("button");
+    span.innerText = item.data;
+    button.innerText = "del";
+    button.callback = this.callbacks.deleteWord;
+    button.addEventListener("click", this.handleDeleteWord);
+    button.setAttribute("data-index", index);
+    li.appendChild(span);
+    li.appendChild(button);
+    return li;
+  }
+
+  clearWordList() {
+    this.ul.innerHTML = "";
+  }
+
+  printWords(words) {
+    if (!this.isShowing) {
+      return;
+    }
+
+    this.clearWordList();
+    words.forEach((word, index) => {
+      const li = this.generateListItem(index, word);
+      this.ul.appendChild(li);
+    });
+  }
+
+}
+
+var _default = wordList;
 exports.default = _default;
 
 },{}]},{},[1]);
