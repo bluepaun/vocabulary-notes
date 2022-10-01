@@ -12,8 +12,12 @@ this is side project
 
 ## upgrade features
 
-- [ ] change title
+- [x] change title
 - [ ] make gui control js to objectively (class)
+    - [x] views add box
+    - [x] views words box
+    - [x] models notes
+    - [ ] views play box
 - [ ] showing current priority by color from red to green
 - [ ] icon update
 - [ ] make edit button to edit saved word and showing delete button

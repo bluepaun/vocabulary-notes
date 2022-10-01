@@ -27,6 +27,13 @@ body header {
     padding: 2em 4em;
     background-color: $blue;
     width: 100%;
+
+    button {
+        &:last-child {
+            background-color: $purple;
+            color: $white;
+        }
+    }
 }
 
 body footer {

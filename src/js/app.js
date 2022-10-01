@@ -1,98 +1,38 @@
 import priorityRandom from "./random";
+import wordsBoxClass from "./views/words-box";
+import addBoxClass from "./views/add-box";
+import notesClass from "./models/notes";
 
-const addBtn = document.querySelector(".addBtn");
-const addWordbox = document.querySelector(".add-word");
-const addWordForm = document.querySelector(".add-word-form");
-const wordListBox = document.querySelector(".word-list");
+const wordsBox = new wordsBoxClass();
+const addBox = new addBoxClass();
+const notes = new notesClass();
+
 const playBox = document.querySelector(".play");
 
-let wordList = [];
-
-const toggleAddWordBox = (on) => {
-    if (on) {
-        addWordbox.style.transform = "translateY(0)";
-    } else {
-        addWordbox.style.transform = "translateY(100%)";
-    }
-};
-
-addBtn.addEventListener("click", (event) => {
-    console.log(event);
-    const curText = event.target.innerText;
-    if (curText === "add") {
-        event.target.innerText = "cancel";
-        toggleAddWordBox(true);
-    } else {
-        event.target.innerText = "add";
-        toggleAddWordBox(false);
-    }
+addBox.setCallback({
+    funcName: "addWord",
+    func: (newWord) => {
+        notes.addWord(newWord);
+        wordsBox.printWords(notes.words);
+    },
 });
 
-const printWordList = () => {
-    if (wordListBox.classList.contains("hidden")) {
-        return;
-    }
-    const ul = wordListBox.querySelector("ul");
-    ul.innerHTML = "";
-    wordList.forEach((word, index) => {
-        const li = document.createElement("li");
-        const span = document.createElement("span");
-        const button = document.createElement("button");
-        span.innerText = word.data;
-        button.innerText = "del";
-        button.addEventListener("click", deleteWord);
-        button.setAttribute("data-index", index);
-        li.appendChild(span);
-        li.appendChild(button);
-        ul.appendChild(li);
-    });
-};
-
-const saveWordList = () => {
-    localStorage.setItem("wordList", JSON.stringify(wordList));
-};
-
-const addWordList = (newWord) => {
-    wordList.push(newWord);
-    saveWordList();
-    printWordList();
-};
-
-const loadWordList = () => {
-    if (localStorage.wordList) {
-        wordList = JSON.parse(localStorage.wordList);
-    }
-    console.log(wordList);
-    printWordList();
-};
-
-const deleteWord = (event) => {
-    const target = event.target;
-    const index = target.getAttribute("data-index");
-    wordList.splice(index, 1);
-    saveWordList();
-    printWordList();
-};
-
-addWordForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const inputs = addWordForm.querySelectorAll("input");
-    console.log(inputs);
-
-    const newWord = {
-        priority: 10,
-        data: inputs[0].value,
-        meaning: inputs[1].value,
-        exampleSentence: inputs[2].value,
-    };
-    inputs.forEach((input) => (input.value = ""));
-    console.log(newWord);
-    addWordList(newWord);
-    toggleAddWordBox(false);
-    addBtn.innerText = "add";
+wordsBox.setCallback({
+    funcName: "deleteWord",
+    func: (index) => {
+        notes.deleteWord(index);
+        wordsBox.printWords(notes.words);
+    },
 });
 
-loadWordList();
+notes.setCallback({
+    funcName: "loadWordComplete",
+    func: (words) => {
+        wordsBox.printWords(words);
+    },
+});
+
+notes.loadWords(notes.notes[0]);
 
 let currentWordIndex = 0;
 const priorityStep = 1;
@@ -102,13 +42,13 @@ const playBtn = document.querySelector(".playBtn");
 playBtn.addEventListener("click", (event) => {
     const target = event.target;
     if (target.innerText === "start") {
-        wordListBox.classList.add("hidden");
+        wordsBox.classList.add("hidden");
         playBox.classList.remove("hidden");
         target.innerText = "stop";
         playGame();
     } else {
         playBox.classList.add("hidden");
-        wordListBox.classList.remove("hidden");
+        wordsBox.classList.remove("hidden");
         target.innerText = "start";
     }
 });
