@@ -109,7 +109,7 @@ class _default {
   constructor() {
     _defineProperty(this, "callbacks", {});
 
-    this.legacyTest();
+    // this.legacyTest();
     this.notes = this.loadNotes();
   }
 
