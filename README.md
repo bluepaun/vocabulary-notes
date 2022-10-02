@@ -27,6 +27,9 @@ this is side project
 - [ ] quiz function (randomly select 3 word's meanings and select one)
 - [ ] change GUI for more user friendly
 
+## upgrade development environment
+- [ ] set TDD (Test Driven Development) environment
+
 ## need data structure
 word
     data
