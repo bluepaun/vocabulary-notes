@@ -1,7 +1,6 @@
 const priorityRandom = (list) => {
     const cumulativeWeights = [];
     list.forEach((word, idx) => {
-        console.log(word, idx);
         cumulativeWeights[idx] =
             word.priority + (cumulativeWeights[idx - 1] || 0);
     });

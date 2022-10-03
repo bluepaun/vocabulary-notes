@@ -1,5 +1,6 @@
 export default class {
     callbacks = {};
+    priorityStep = 1;
     constructor() {
         // this.legacyTest();
         this.notes = this.loadNotes();
@@ -65,6 +66,19 @@ export default class {
 
     deleteWord(index) {
         this.words.splice(index, 1);
+        this.saveCurWords();
+    }
+
+    increasePriority(index) {
+        this.words[index].priority += this.priorityStep;
+        this.saveCurWords();
+    }
+
+    decreasePriority(index) {
+        this.words[index].priority -= this.priorityStep;
+        if (this.words[index].priority < 1) {
+            this.words[index].priority = 1;
+        }
         this.saveCurWords();
     }
 }

@@ -1,5 +1,4 @@
 class wordList {
-    //deleteWord
     callbacks = {};
     constructor() {
         this.box = document.querySelector(".word-list");
@@ -14,7 +13,7 @@ class wordList {
         if (on) {
             this.box.classList.remove("hidden");
         } else {
-            this.box.classList.remove("hidden");
+            this.box.classList.add("hidden");
         }
     }
 

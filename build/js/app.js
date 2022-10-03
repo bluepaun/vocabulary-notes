@@ -1,20 +1,25 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
-var _random = _interopRequireDefault(require("./random"));
-
 var _wordsBox = _interopRequireDefault(require("./views/words-box"));
 
 var _addBox = _interopRequireDefault(require("./views/add-box"));
 
+var _playBox = _interopRequireDefault(require("./views/play-box"));
+
 var _notes = _interopRequireDefault(require("./models/notes"));
+
+var _playGame = _interopRequireDefault(require("./models/playGame"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// views
+// models
 const wordsBox = new _wordsBox.default();
 const addBox = new _addBox.default();
 const notes = new _notes.default();
-const playBox = document.querySelector(".play");
+const playBox = new _playBox.default();
+const playGame = new _playGame.default();
 addBox.setCallback({
   funcName: "addWord",
   func: newWord => {
@@ -35,67 +40,38 @@ notes.setCallback({
     wordsBox.printWords(words);
   }
 });
+playBox.setCallback({
+  funcName: "playCallback",
+  func: play => {
+    if (play) {
+      wordsBox.showBox(false);
+      playBox.printWord(playGame.play(notes.words));
+    } else {
+      wordsBox.showBox(true);
+      wordsBox.printWords(notes.words);
+    }
+  }
+});
+playBox.setCallback({
+  funcName: "passCallback",
+  func: () => {
+    notes.decreasePriority(playGame.currentWordIndex);
+    playBox.printWord(playGame.play(notes.words));
+  }
+});
+playBox.setCallback({
+  funcName: "checkCallback",
+  func: check => {
+    if (check) {
+      notes.increasePriority(playGame.currentWordIndex);
+    } else {
+      playBox.printWord(playGame.play(notes.words));
+    }
+  }
+});
 notes.loadWords(notes.notes[0]);
-let currentWordIndex = 0;
-const priorityStep = 1;
-const playBtn = document.querySelector(".playBtn");
-playBtn.addEventListener("click", event => {
-  const target = event.target;
 
-  if (target.innerText === "start") {
-    wordsBox.classList.add("hidden");
-    playBox.classList.remove("hidden");
-    target.innerText = "stop";
-    playGame();
-  } else {
-    playBox.classList.add("hidden");
-    wordsBox.classList.remove("hidden");
-    target.innerText = "start";
-  }
-});
-const passBtn = playBox.querySelector(".passBtn");
-passBtn.addEventListener("click", event => {
-  wordList[currentWordIndex].priority -= priorityStep;
-
-  if (wordList[currentWordIndex].priority < 1) {
-    wordList[currentWordIndex].priority = 1;
-  }
-
-  playGame();
-});
-const checkBtn = playBox.querySelector(".checkBtn");
-checkBtn.addEventListener("click", event => {
-  const target = event.target;
-
-  if (target.innerText === "check") {
-    wordList[currentWordIndex].priority += priorityStep;
-    target.innerText = "next";
-    const mean = playBox.querySelector("span");
-    mean.classList.remove("hidden");
-    passBtn.disabled = true;
-  } else {
-    target.innerText = "check";
-    playGame();
-    passBtn.disabled = false;
-  }
-});
-
-const printWord = word => {
-  const question = playBox.querySelector("h3");
-  const sentence = playBox.querySelector("p");
-  const mean = playBox.querySelector("span");
-  mean.classList.add("hidden");
-  question.innerText = word.data;
-  sentence.innerText = word.exampleSentence;
-  mean.innerHTML = word.meaning;
-};
-
-const playGame = () => {
-  currentWordIndex = (0, _random.default)(wordList);
-  printWord(wordList[currentWordIndex]);
-};
-
-},{"./models/notes":2,"./random":3,"./views/add-box":4,"./views/words-box":5}],2:[function(require,module,exports){
+},{"./models/notes":2,"./models/playGame":3,"./views/add-box":5,"./views/play-box":6,"./views/words-box":7}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -109,7 +85,9 @@ class _default {
   constructor() {
     _defineProperty(this, "callbacks", {});
 
-    this.legacyTest();
+    _defineProperty(this, "priorityStep", 1);
+
+    // this.legacyTest();
     this.notes = this.loadNotes();
   }
 
@@ -182,6 +160,21 @@ class _default {
     this.saveCurWords();
   }
 
+  increasePriority(index) {
+    this.words[index].priority += this.priorityStep;
+    this.saveCurWords();
+  }
+
+  decreasePriority(index) {
+    this.words[index].priority -= this.priorityStep;
+
+    if (this.words[index].priority < 1) {
+      this.words[index].priority = 1;
+    }
+
+    this.saveCurWords();
+  }
+
 }
 
 exports.default = _default;
@@ -194,10 +187,39 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _random = _interopRequireDefault(require("./random"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class _default {
+  constructor() {
+    _defineProperty(this, "callbacks", {});
+  }
+
+  play(words) {
+    console.log(words);
+    const index = (0, _random.default)(words);
+    this.currentWordIndex = index;
+    return words[index];
+  }
+
+}
+
+exports.default = _default;
+
+},{"./random":4}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 const priorityRandom = list => {
   const cumulativeWeights = [];
   list.forEach((word, idx) => {
-    console.log(word, idx);
     cumulativeWeights[idx] = word.priority + (cumulativeWeights[idx - 1] || 0);
   });
   const maxcumulativeWeight = cumulativeWeights[cumulativeWeights.length - 1];
@@ -213,7 +235,7 @@ const priorityRandom = list => {
 var _default = priorityRandom;
 exports.default = _default;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -286,7 +308,94 @@ class _default {
 
 exports.default = _default;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+class _default {
+  constructor() {
+    _defineProperty(this, "callbacks", {});
+
+    this.btn = document.querySelector(".playBtn");
+    this.btn.myClass = this;
+    this.box = document.querySelector(".play");
+    this.box.myClass = this;
+    this.passBtn = this.box.querySelector(".passBtn");
+    this.passBtn.myClass = this;
+    this.checkBtn = this.box.querySelector(".checkBtn");
+    this.checkBtn.myClass = this;
+    this.question = this.box.querySelector("h3");
+    this.example = this.box.querySelector("p");
+    this.mean = this.box.querySelector("span");
+    this.btn.addEventListener("click", this.handlePlay);
+    this.passBtn.addEventListener("click", this.handlePass);
+    this.checkBtn.addEventListener("click", this.handleCheck);
+  }
+
+  showBox(on) {
+    if (on) {
+      this.box.classList.remove("hidden");
+    } else {
+      this.box.classList.add("hidden");
+    }
+  }
+
+  setCallback(_ref) {
+    let {
+      funcName,
+      func
+    } = _ref;
+    this.callbacks[funcName] = func;
+  }
+
+  handlePlay(event) {
+    if (this.innerText === "start") {
+      this.myClass.showBox(true);
+      this.innerText = "stop";
+      this.myClass.callbacks.playCallback(true);
+    } else {
+      this.myClass.showBox(false);
+      this.innerText = "start";
+      this.myClass.callbacks.playCallback(false);
+    }
+  }
+
+  handlePass(event) {
+    this.myClass.callbacks.passCallback();
+  }
+
+  handleCheck(event) {
+    if (this.innerText === "check") {
+      this.innerText = "next";
+      this.myClass.passBtn.disabled = true;
+      this.myClass.mean.classList.remove("hidden");
+      this.myClass.callbacks.checkCallback(true);
+    } else {
+      this.innerText = "check";
+      this.myClass.passBtn.disabled = false;
+      this.myClass.callbacks.checkCallback(false);
+    }
+  }
+
+  printWord(word) {
+    console.log(word);
+    this.mean.classList.add("hidden");
+    this.question.innerText = word.data;
+    this.example.innerText = word.exampleSentence;
+    this.mean.innerText = word.meaning;
+  }
+
+}
+
+exports.default = _default;
+
+},{}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -297,7 +406,6 @@ exports.default = void 0;
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 class wordList {
-  //deleteWord
   constructor() {
     _defineProperty(this, "callbacks", {});
 
@@ -313,7 +421,7 @@ class wordList {
     if (on) {
       this.box.classList.remove("hidden");
     } else {
-      this.box.classList.remove("hidden");
+      this.box.classList.add("hidden");
     }
   }
 
