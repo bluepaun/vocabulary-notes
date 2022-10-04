@@ -20,7 +20,7 @@ this is side project
     - [x] views play box
     - [x] models play game
 - [ ] showing current priority by color from red to green
-- [ ] icon update
+- [x] icon update
 - [ ] make edit button to edit saved word and showing delete button
 - [ ] create vocabulary notes to speared note
 - [ ] change data structure multi meanings and example sentences

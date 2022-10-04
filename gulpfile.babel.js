@@ -11,6 +11,7 @@ import sourcemaps from "gulp-sourcemaps";
 import source from "vinyl-source-stream";
 import buffer from "vinyl-buffer";
 import ghPages from "gulp-gh-pages";
+import GulpImage from "gulp-image";
 
 const scss = gsass(sass);
 
@@ -29,6 +30,11 @@ const routes = {
         src: "src/js/app.js",
         dest: "build/js",
         watch: "src/js/**/*.js",
+    },
+    img: {
+        src: "src/resources/images/*",
+        dest: "build/resources/images",
+        watch: "src/resources/images/*",
     },
 };
 
@@ -64,6 +70,9 @@ const buildJs = () =>
         // .pipe(sourcemaps.write("./"))
         .pipe(gulp.dest(routes.js.dest));
 
+const buildImg = () =>
+    gulp.src(routes.img.src).pipe(GulpImage()).pipe(gulp.dest(routes.img.dest));
+
 const watch = () => {
     gulp.watch(routes.pug.watch, buildPug);
     gulp.watch(routes.scss.watch, buildScss);
@@ -76,7 +85,13 @@ const cleanPublish = async () => await deleteSync([".publish"]);
 const webServer = () => gulp.src("build").pipe(webserver({ livereload: true }));
 
 const prepare = gulp.series([clean]);
-const build = gulp.series([prepare, buildPug, buildScss, buildJs]);
+export const build = gulp.series([
+    prepare,
+    buildPug,
+    buildScss,
+    buildJs,
+    buildImg,
+]);
 const post = gulp.series([webServer, watch]);
 
 export const dev = gulp.series([prepare, build, post]);
