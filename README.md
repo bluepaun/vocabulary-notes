@@ -19,7 +19,7 @@ this is side project
     - [x] models notes
     - [x] views play box
     - [x] models play game
-- [ ] showing current priority by color from red to green
+- [x] showing current priority by color from red to green
 - [x] icon update
 - [ ] make edit button to edit saved word and showing delete button
 - [ ] create vocabulary notes to speared note

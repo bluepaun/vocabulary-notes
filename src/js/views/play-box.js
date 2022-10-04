@@ -60,7 +60,6 @@ export default class {
     }
 
     printWord(word) {
-        console.log(word);
         this.mean.classList.add("hidden");
 
         this.question.innerText = word.data;

@@ -199,7 +199,6 @@ class _default {
   }
 
   play(words) {
-    console.log(words);
     const index = (0, _random.default)(words);
     this.currentWordIndex = index;
     return words[index];
@@ -384,7 +383,6 @@ class _default {
   }
 
   printWord(word) {
-    console.log(word);
     this.mean.classList.add("hidden");
     this.question.innerText = word.data;
     this.example.innerText = word.exampleSentence;
@@ -408,6 +406,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 class wordList {
   constructor() {
     _defineProperty(this, "callbacks", {});
+
+    _defineProperty(this, "notiHighColor", [0xff, 0x00, 0x00]);
+
+    _defineProperty(this, "notiMidColor", [0x00, 0x00, 0xff]);
+
+    _defineProperty(this, "notiLowColor", [0x00, 0xff, 0x00]);
 
     this.box = document.querySelector(".word-list");
     this.ul = this.box.querySelector("ul");
@@ -433,6 +437,13 @@ class wordList {
     this.callbacks[funcName] = func;
   }
 
+  pickHex(color1, color2, weight) {
+    const w1 = weight;
+    const w2 = 1 - w1;
+    const rgb = [Math.round(color1[0] * w1 + color2[0] * w2), Math.round(color1[1] * w1 + color2[1] * w2), Math.round(color1[2] * w1 + color2[2] * w2)];
+    return rgb;
+  }
+
   handleDeleteWord(event) {
     const target = event.target;
     const index = target.getAttribute("data-index");
@@ -441,14 +452,34 @@ class wordList {
 
   generateListItem(index, item) {
     const li = document.createElement("li");
+    const noti = document.createElement("div");
     const span = document.createElement("span");
     const button = document.createElement("button");
     span.innerText = item.data;
+    let weight = item.priority / 20;
+
+    if (weight > 1) {
+      weight = 1;
+    }
+
+    let rgb;
+
+    if (weight > 0.5) {
+      weight -= 0.5;
+      weight /= 0.5;
+      rgb = this.pickHex(this.notiHighColor, this.notiMidColor, weight);
+    } else {
+      weight /= 0.5;
+      rgb = this.pickHex(this.notiMidColor, this.notiLowColor, weight);
+    }
+
+    noti.style.backgroundColor = `rgba(${rgb.join()},1)`;
     button.innerText = "del";
     button.callback = this.callbacks.deleteWord;
     button.addEventListener("click", this.handleDeleteWord);
     button.setAttribute("data-index", index);
     li.appendChild(span);
+    li.appendChild(noti);
     li.appendChild(button);
     return li;
   }

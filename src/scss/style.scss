@@ -59,10 +59,17 @@ body footer {
 }
 
 .word-list li {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr min-content min-content;
     align-items: center;
     padding: 1em 4em;
+    gap: 2em;
+
+    div {
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+    }
 }
 
 .play {
